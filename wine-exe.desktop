@@ -1,0 +1,12 @@
+[Desktop Entry]
+Name=Wine
+Comment=Run Windows executables with Wine
+Exec=/usr/local/bin/wine-wrap.sh "%f"
+TryExec=/usr/local/bin/wine-wrap.sh
+Icon=wine
+Type=Application
+Terminal=false
+MimeType=application/x-ms-dos-executable;application/x-msdownload;
+NoDisplay=false
+Icon=wine
+Categories=Utility;
