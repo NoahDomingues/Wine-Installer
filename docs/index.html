@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Wine Installer</title>
+  <meta name="description" content="A simple Linux installation script for Wine. Enables launching .exe via Files right-click." />
+  <meta name="color-scheme" content="dark" />
+  <meta name="theme-color" content="#0b0f1a" />
+  <style>
+    :root {
+      --bg: #0b0f1a;
+      --panel: #0f1629;
+      --text: #e5e7eb;
+      --muted: #9aa0a6;
+      --border: #1f2937;
+      --code-bg: #111827;
+      --accent: #7dd3fc;
+      --accent-strong: #38bdf8;
+      --blockquote: #0d1426;
+      --table-stripe: #0c1324;
+
+      --callout-note: rgba(125, 211, 252, 0.06);
+      --callout-important: rgba(251, 191, 36, 0.08);
+      --callout-warning: rgba(248, 113, 113, 0.08);
+      --callout-tip: rgba(34, 197, 94, 0.08);
+      --callout-caution: rgba(234, 179, 8, 0.08);
+
+      --radius: 14px;
+      --shadow: 0 10px 30px rgba(0,0,0,0.35);
+      --shadow-soft: 0 6px 20px rgba(0,0,0,0.25);
+      --header-gradient: radial-gradient(1000px 500px at 20% -10%, rgba(56,189,248,0.16), transparent 55%), radial-gradient(800px 400px at 90% -20%, rgba(34,197,94,0.10), transparent 60%);
+    }
+
+    html,body {
+      background: var(--bg);
+      color: var(--text);
+      margin: 0;
+      padding: 0;
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", sans-serif;
+      line-height: 1.65;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      scroll-behavior: smooth;
+    }
+
+    .container {
+      max-width: 1024px;
+      margin: 0 auto;
+      padding: 2.5rem 1rem 4rem;
+    }
+
+    header {
+      position: relative;
+      margin: 0 auto 1.5rem;
+      padding: 1.75rem 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      background: var(--panel);
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      text-align: center;
+    }
+    header::before {
+      content: "";
+      position: absolute;
+      inset: -1px;
+      background: var(--header-gradient);
+      pointer-events: none;
+      z-index: 0;
+      filter: blur(2px);
+    }
+    header h1, header p { position: relative; z-index: 1; margin: 0; max-width: 60ch; margin-left: auto; margin-right: auto; }
+
+    h1 { font-size: 2rem; margin-bottom: 0.35rem; }
+    h2 { font-size: 1.3rem; margin-top: 1rem; }
+    h3 { font-size: 1.05rem; color: #cbd5e1; margin-top:0.75rem; }
+
+    p, ul, ol {
+      margin: 0.75rem 0;
+      color: var(--text);
+    }
+
+    main[role="main"] > section {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1.25rem 1rem;
+      margin: 1rem 0;
+      box-shadow: var(--shadow-soft);
+    }
+
+    a { color: var(--accent); text-decoration: none; text-underline-offset: 2px; transition: color 150ms ease; }
+    a:hover { color: var(--accent-strong); text-decoration: underline; }
+
+    code {
+      background: var(--code-bg);
+      color: #e6edf3;
+      padding: 0.12rem 0.35rem;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+      font-size: 0.95em;
+      white-space: pre-wrap;
+    }
+
+    pre {
+      background: var(--code-bg);
+      border: 1px solid var(--border);
+      padding: 1rem;
+      border-radius: 10px;
+      overflow-x: auto;
+      margin: 0.75rem 0 1rem;
+      box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02);
+      white-space: pre;
+      word-break: normal;
+    }
+    pre code { background: transparent; padding: 0; border: none; white-space: pre; }
+
+    /* Make pre/code inside callouts wrap nicely */
+    .callout pre {
+      white-space: pre-wrap;          /* allow wrapping */
+      overflow-wrap: anywhere;        /* break long tokens if needed */
+      word-break: break-word;
+      margin: 0;
+    }
+    .callout pre code { white-space: pre-wrap; }
+
+    blockquote {
+      background: var(--blockquote);
+      border-left: 4px solid var(--accent);
+      margin: 0.75rem 0;
+      padding: 0.6rem 0.9rem;
+      color: var(--muted);
+      border-radius: 10px;
+    }
+
+    .callouts { margin-top: 0.5rem; display: grid; gap: 0.6rem; }
+    .callout {
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.75rem 0.9rem;
+      backdrop-filter: saturate(110%) blur(0px);
+    }
+    .callout .title { font-weight: 700; margin-bottom: 0.35rem; color: #cbd5e1; }
+    .callout.note      { background: var(--callout-note); }
+    .callout.important { background: var(--callout-important); }
+    .callout.warning   { background: var(--callout-warning); }
+    .callout.tip       { background: var(--callout-tip); }
+    .callout.caution   { background: var(--callout-caution); }
+
+    table { border-collapse: collapse; width: 100%; margin: 1rem 0; border: 1px solid var(--border); border-radius: 10px; overflow: hidden; background: #0c1324; }
+    th, td { border-bottom: 1px solid var(--border); padding: 0.6rem 0.75rem; text-align: left; color: var(--text); }
+    thead th { background: #0a1222; font-weight: 600; }
+    tbody tr:nth-child(odd) { background: var(--table-stripe); }
+
+    .badges { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 0.75rem; align-items: center; margin-top:0.5rem; }
+    .badge-item { display:flex; align-items:center; gap:0.6rem; background:#0c152b; border:1px solid var(--border); border-radius:12px; padding:0.6rem 0.75rem; }
+    .badge-item img { max-width:220px; width:auto; height:28px; object-fit:contain; display:block; }
+    .badge-item code { border:none; background:transparent; padding:0; color:var(--muted); font-size:0.9em; }
+
+    /* Footer badge sizing fix (explicit class to avoid stretching) */
+    .badge-inline { max-width:220px; width:auto; height:28px; object-fit:contain; }
+
+    .task-list { list-style:none; padding-left:0; }
+    .task-list li { margin:0.35rem 0; display:flex; align-items:center; gap:0.45rem; }
+    .task-list input[type="checkbox"] { accent-color: var(--accent-strong); width:1rem; height:1rem; }
+
+    footer { margin-top:2rem; border-top:1px solid var(--border); padding-top:1rem; font-size:0.95rem; color:var(--muted); }
+
+    .section-center-text { text-align:center; }
+
+    :focus-visible { outline: 2px solid var(--accent-strong); outline-offset: 2px; border-radius: 8px; }
+
+    @media (prefers-reduced-motion: reduce) {
+      :root { --shadow: none; --shadow-soft: none; }
+      * { transition: none !important; animation: none !important; }
+    }
+
+    .skip-link { position:absolute; left:-9999px; top:auto; }
+    .skip-link:focus { position:fixed; left:1rem; top:1rem; background:#000; color:#fff; padding:.5rem; z-index:9999; border-radius:6px; text-decoration:none; }
+
+    /* Larger centered Discord invite in Support - ND*/
+    .support-figure {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0.5rem 0 0;
+    }
+    .badge-large {
+      width: 320px;
+      max-width: 90%;
+      height: auto;
+      object-fit: contain;
+      border-radius: 8px;
+      box-shadow: var(--shadow-soft);
+      display: block;
+    }
+  </style>
+</head>
+<body>
+  <a href="#content" class="skip-link">Skip to content</a>
+
+  <div class="container">
+    <header role="banner" aria-hidden="false">
+      <h1>Wine Installer</h1>
+      <p>A simple Linux installation script for Wine. Also enables launching <code>.exe</code> executables via GUI using the Files right-click context menu. 🍷</p>
+    </header>
+
+    <main id="content" role="main" aria-label="Main content">
+      <!-- Installation section -->
+      <section aria-labelledby="installation">
+        <h2 id="installation">📥 Installation</h2>
+
+        <div class="callouts" aria-label="Important information">
+          <div class="callout important" role="region" aria-labelledby="imp-title">
+            <div class="title" id="imp-title">Important</div>
+            <pre><code>The installation script will only install <code>wine</code> and <code>winetricks</code> if they are not already installed. If one or both programs are already installed, the script will continue with the remaining actions.</code></pre>
+          </div>
+        </div>
+
+        <h3>🖱 GUI</h3>
+        <ul>
+          <li>Download the latest release from the <a href="https://github.com/NoahDomingues/Wine-Installer" target="_blank" rel="noopener noreferrer"><strong>Releases</strong></a> section</li>
+          <li>Unzip the downloaded archive</li>
+          <li>Right-click <code>wine-installer.sh</code> and click <strong>Run</strong></li>
+          <li>Enter the root password when prompted</li>
+        </ul>
+
+        <h3>⌨ Command line</h3>
+        <p>Download the latest release:</p>
+        <pre><code class="language-bash">set -euo pipefail
+
+# Download latest release tag
+LATEST_TAG=$(curl -s "https://api.github.com/repos/NoahDomingues/Wine-Installer/releases/latest" \
+  | grep -Po '"tag_name":\s*"\K(.*?)(?=")')
+
+# Download, extract, enter folder, make installer executable and run it
+curl -L -o release.zip "https://github.com/NoahDomingues/Wine-Installer/archive/refs/tags/${LATEST_TAG}.zip"</code></pre>
+
+        <p>Unzip the downloaded archive:</p>
+        <pre><code class="language-bash">unzip -q release.zip</code></pre>
+
+        <p>Make the script executable and run it:</p>
+        <pre><code class="language-bash">cd "Wine-Installer-${LATEST_TAG}"
+chmod +x install-wine-handler.sh
+./install-wine-handler.sh</code></pre>
+      </section>
+
+      <!-- Uninstallation -->
+      <section aria-labelledby="uninstall">
+        <h2 id="uninstall">❌ Uninstallation</h2>
+        <p>Run <code>wine-uninstaller.sh</code> or run the following commands to revert all changes made by <strong>Wine Installer</strong> and remove Wine from your system:</p>
+        <pre><code class="language-bash"># Remove Wine wrapper and desktop entry
+sudo rm -f /usr/local/bin/wine-wrap.sh
+sudo rm -f /usr/share/applications/wine.desktop
+sudo update-desktop-database /usr/share/applications || true
+
+# Restore mimeapps.list backup if present
+ls -1 /etc/xdg/mimeapps.list.bak*
+
+# Optionally remove wine packages
+sudo apt remove --purge -y wine64 wine32 winetricks
+sudo apt autoremove -y</code></pre>
+
+        <hr />
+
+        <div class="callouts" aria-label="Caution note">
+          <div class="callout caution" role="region" aria-labelledby="cau-title">
+            <div class="title" id="cau-title">Caution</div>
+            <pre><code>In order to install right-click context menu launching, the installer script needs to create a system-wide desktop entry for Wine and install a wrapper script. In order to do this, the script requires superuser (sudo) permissions. When running the installer via GUI, your system should prompt you to enter the superuser password; however, if this does not happen, open a terminal and run the script using the command <code>sudo ./wine-installer.sh</code>.</code></pre>
+          </div>
+        </div>
+
+        <div class="callouts" aria-label="Note">
+          <div class="callout note" role="region" aria-labelledby="note-title">
+            <div class="title" id="note-title">Note</div>
+            <pre><code><strong>Wine Installer</strong> runs the following actions:
+
+- Installs Wine
+- Installs Winetricks (Wine manager)
+- Sets up <code>wine</code> (<code>winecfg</code>)
+- Enables launching <code>.exe</code> executables using the Files right-click context menu (GUI launching)
+
+The log file <code>wine-launch.log</code> for GUI launching will be available in the <code>~/.cache</code> directory.</code></pre>
+          </div>
+        </div>
+      </section>
+
+      <!-- Support -->
+      <section aria-labelledby="support">
+        <h2 id="support">🤝 Support</h2>
+        <p>If you run into issues or want to contribute, check out my <strong><a href="https://discord.gg/3zbfaTNN7V" target="_blank" rel="noopener noreferrer">Discord server</a></strong> or open a GitHub issue. Contributions, feature suggestions, and pull requests are always welcome.</p>
+      
+        <figure class="support-figure" aria-label="Discord invite">
+          <a href="https://discord.gg/3zbfaTNN7V" target="_blank" rel="noopener noreferrer" aria-label="Discord invite">
+            <img src="https://github.com/user-attachments/assets/f61046f5-1dc5-4b0c-87f8-4a94d6cbac96"
+                 alt="Join the Discord server"
+                 class="badge-large" />
+          </a>
+        </figure>
+      </section>
+
+
+      <!-- Contributors -->
+      <section aria-labelledby="contributors">
+        <h2 id="contributors">👥 Contributors</h2>
+
+        <p>
+          <a href="https://github.com/NoahDomingues/Wine-Installer/graphs/contributors" target="_blank" rel="noopener noreferrer" aria-label="Repository contributors">
+            <img src="https://contrib.rocks/image?repo=NoahDomingues/Wine-Installer" alt="Contributors" style="max-width:100%;height:auto;" />
+          </a>
+        </p>
+
+        <div class="badges" aria-label="Badges">
+          <div class="badge-item" aria-hidden="false">
+            <img src="https://img.shields.io/badge/Discord-%235865F2.svg?style=for-the-badge&logo=discord&logoColor=white" alt="Discord badge" />
+            <code>https://discord.gg/3zbfaTNN7V</code>
+          </div>
+        </div>
+
+        <p><strong>⭐ If this tool was of any use to you, please consider giving it a Star - it would make my day! ⭐</strong></p>
+      </section>
+
+      <!-- Decorative capsule -->
+      <section aria-hidden="true" class="section-center-text" style="background:transparent;border:none;box-shadow:none;padding-top:0;">
+        <div style="display:flex;justify-content:center;">
+          <img src="https://capsule-render.vercel.app/api?type=waving&color=gradient&height=100&section=footer" alt="" aria-hidden="true" style="max-width:100%;height:auto;border-radius:8px;" />
+        </div>
+      </section>
+    </main>
+
+    <footer role="contentinfo">
+      <p>© <span id="year"></span> Noah Domingues — Wine Installer.</p>
+    </footer>
+  </div>
+
+  <script>
+    // Set year
+    document.getElementById('year').textContent = new Date().getFullYear();
+  </script>
+</body>
+</html>
