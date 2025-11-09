@@ -8,5 +8,4 @@ Type=Application
 Terminal=false
 MimeType=application/x-ms-dos-executable;application/x-msdownload;
 NoDisplay=false
-Icon=wine
-Categories=Utility;
+Categories=Utility
