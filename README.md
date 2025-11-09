@@ -42,6 +42,23 @@ A simple Linux installation script for Wine. Also enables launching .exe executa
   ./install-wine-handler.sh
   ```
 
+## ❌ Uninstallation
+
+Run `wine-uninstaller.sh` or run the following commands to revert all changes made by **Wine Installer** and remove Wine from your system:
+
+```
+sudo rm -f /usr/local/bin/wine-wrap.sh
+sudo rm -f /usr/share/applications/wine.desktop
+sudo update-desktop-database /usr/share/applications || true
+# restore mimeapps.list backup if present
+ls -1 /etc/xdg/mimeapps.list.bak*
+# optionally remove wine packages
+sudo apt remove --purge -y wine64 wine32 winetricks
+sudo apt autoremove -y
+```
+
+---
+
 > [!CAUTION]
 >
 > In order to install right-click context menu launching, the installer script needs to create a system-wide desktop entry for Wine and install a wrapper script. In order to do this, the script requires superuser (`sudo`) permissions. When running the installer via GUI, your system should prompt you to enter the superuser password; however, if this does not happen, open a terminal and run the script using the command `sudo ./wine-installer.sh`. 
