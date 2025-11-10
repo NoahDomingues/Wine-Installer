@@ -75,7 +75,7 @@ sudo apt autoremove -y
 > - Sets up `wine` (`winecfg`)
 > - Enables launching `.exe` executables using the Files right-click context menu (GUI launching)
 >
-> The log file `wine-launch.log` for GUI kaunching will be available in the `~/.cache` directory.
+> The log file `wine-launch.log` for GUI launching will be available in the `~/.cache` directory.
 
 ## 🤝 Support
 
